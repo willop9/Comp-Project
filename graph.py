@@ -43,19 +43,16 @@ for n in list(G.nodes):
                         if(m == x):
                                 edges.append([n,m])
 
-#print("Printing Edges")
-#for x in edges:
-       # print('/////////////////////////')
-        #print(x)
-        #print('#########################')
-
 G.add_edges_from(edges)
 print(G.number_of_edges())
 
 httpNodes = soup.find_all(src=True)
 for n in httpNodes:
+        src = n['src']
         print(n)
-        G.add_node(n, type='HTTP')
+        G.add_node(src, type='HTTP')
+
+print(G.number_of_nodes())#19?????
 #drawing graph fingers crossed
 plt.subplot(111)
 nx.draw(G)

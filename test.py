@@ -9,4 +9,7 @@ array = soup.find_all(src=True)
 print(array)
 print("########################")
 for n in array:
+    src = n['src']
+    print(src)
+    print('////////////////////////')
     print(n)
