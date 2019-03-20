@@ -12,31 +12,31 @@ bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 soup = BeautifulSoup(site, 'lxml')
 soup2 = BeautifulSoup(bbc, 'lxml')
 
-soupNodes = []
+HTMLNodes = []
 edges = []
 bbcNodes = []
-
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        soupNodes.append(child)
+        HTMLNodes.append(child)
 
-for child in soup2.descendants:
-    if(child.name is not None):
-        bbcNodes.append(child)
+## Commented out for speed
+#for child in soup2.descendants:
+    #if(child.name is not None):
+        #bbcNodes.append(child)
+
 #Adding nodes to Graph
-G.add_nodes_from(soupNodes)
+#G.add_nodes_from(HTMLNodes)
 H.add_nodes_from(bbcNodes)
 
 print(G.number_of_nodes()) #15 is the correct number!
 print(H.number_of_nodes()) #1344
 
 #Attempting to create edges
-edges = []
 #For all the nodes create list of children
 for n in list(G.nodes):
         children = n.contents
-        #Cycle through node list again not accounting for current node currently
+        #Cycle through node list again
         for m in list(G.nodes):
                 #cyclce through child list and check if any of the children of the current node are equal to any other node. If so append to edges list
                 for x in children:
@@ -52,12 +52,18 @@ for n in list(G.nodes):
 G.add_edges_from(edges)
 print(G.number_of_edges())
 
+httpNodes = soup.find_all(src=True)
+for n in httpNodes:
+        print(n)
+        G.add_node(n)
 #drawing graph fingers crossed
 plt.subplot(111)
 nx.draw(G)
 plt.show()
 #Things to do next:
-#create edge rules. Edges between parents and children
-#G.add_edges_from([(1,2)],[(1,3)]) Example for adding numerical edges. Edges can be added between nodes
-#Nodes in the graph still work as bs4 tag objects. Iterate through g.nodes and create an edge if any of the other nodes a direct child
-#.parent attribute shows a tags parents. .contents shows a list of a tags direct children
+#Create an array of http nodes where a src attribute points to a url
+#add nodes to the graph, represent nodes with different colours
+#add edges to nodes with their corresponding html node
+
+#Method:
+#Beautifulsoup findall('src') and add that to http array
