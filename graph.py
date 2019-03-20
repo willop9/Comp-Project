@@ -13,12 +13,14 @@ soup = BeautifulSoup(site, 'lxml')
 soup2 = BeautifulSoup(bbc, 'lxml')
 
 HTMLNodes = []
-edges = []
+htmlToHtmlEdges = []
+htmlToHttpEdges = []
 bbcNodes = []
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
         G.add_node(child, type='HTML')
+        HTMLNodes.append(child)
 
 ## Commented out for speed
 #for child in soup2.descendants:
@@ -41,9 +43,9 @@ for n in list(G.nodes):
                 #cyclce through child list and check if any of the children of the current node are equal to any other node. If so append to edges list
                 for x in children:
                         if(m == x):
-                                edges.append([n,m])
+                                htmlToHtmlEdges.append([n,m])
 
-G.add_edges_from(edges)
+G.add_edges_from(htmlToHtmlEdges)
 print(G.number_of_edges())
 
 httpNodes = soup.find_all(src=True)
@@ -51,11 +53,31 @@ for n in httpNodes:
         src = n['src']
         print(n)
         G.add_node(src, type='HTTP')
+        htmlToHttpEdges.append([n,src])
+
+G.add_edges_from(htmlToHttpEdges)
 
 print(G.number_of_nodes())#19?????
 #drawing graph fingers crossed
+pos = nx.spring_layout(G)
 plt.subplot(111)
-nx.draw(G)
+nx.draw_networkx_nodes(G,pos,
+                       nodelist=HTMLNodes,
+                       node_color='r',
+                       node_size=500,
+                   alpha=1)
+nx.draw_networkx_edges(G,pos,
+                       edgelist=htmlToHtmlEdges,
+                       width=3,alpha=0.8,edge_color='black')
+nx.draw_networkx_nodes(G,pos,
+                       nodelist=httpNodes,
+                       node_color='b',
+                       node_size=250,
+                   alpha=1)
+nx.draw_networkx_edges(G,pos,
+                       edgelist=htmlToHttpEdges,
+                       width=3,alpha=0.8,edge_color='green')
+        
 plt.show()
 #Things to do next:
 #Create an array of http nodes where a src attribute points to a url
