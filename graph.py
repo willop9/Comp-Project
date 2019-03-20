@@ -18,7 +18,7 @@ bbcNodes = []
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        HTMLNodes.append(child)
+        G.add_node(child, type='HTML')
 
 ## Commented out for speed
 #for child in soup2.descendants:
@@ -55,7 +55,7 @@ print(G.number_of_edges())
 httpNodes = soup.find_all(src=True)
 for n in httpNodes:
         print(n)
-        G.add_node(n)
+        G.add_node(n, type='HTTP')
 #drawing graph fingers crossed
 plt.subplot(111)
 nx.draw(G)
