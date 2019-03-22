@@ -20,17 +20,13 @@ bbcNodes = []
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        G.add_node(child, type='HTML')
+        G.add_node(child, type='HTML', tag='misc')
         HTMLNodes.append(child)
 
 ## Commented out for speed
 #for child in soup2.descendants:
     #if(child.name is not None):
         #bbcNodes.append(child)
-
-#Adding nodes to Graph
-#G.add_nodes_from(HTMLNodes)
-H.add_nodes_from(bbcNodes)
 
 print(G.number_of_nodes()) #15 is the correct number!
 print(H.number_of_nodes()) #1344
