@@ -13,6 +13,7 @@ soup = BeautifulSoup(site, 'lxml')
 soup2 = BeautifulSoup(bbc, 'lxml')
 
 HTMLNodes = []
+httpNodes = []
 htmlToHtmlEdges = []
 htmlToHttpEdges = []
 bbcNodes = []
@@ -48,11 +49,11 @@ for n in list(G.nodes):
 G.add_edges_from(htmlToHtmlEdges)
 print(G.number_of_edges())
 
-httpNodes = soup.find_all(src=True)
-for n in httpNodes:
+for n in soup.find_all(src=True):
         src = n['src']
         print(n)
         G.add_node(src, type='HTTP')
+        httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
 
 G.add_edges_from(htmlToHttpEdges)
@@ -86,3 +87,8 @@ plt.show()
 
 #Method:
 #Beautifulsoup findall('src') and add that to http array
+#Code I have lost:
+#Adding atributes to my nodes
+#Add edges not by adding them to a list but individually as well
+#Add nodes independantly and give them atrribute of misc
+#find all img, style, and iframe nodes and give them attributes
