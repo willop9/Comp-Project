@@ -22,10 +22,13 @@ for child in soup.descendants:
     if(child.name is not None):
         G.add_node(child, type='HTML', tag='misc')
         HTMLNodes.append(child)
-
+#adding tage attributes for different types of nodes
 for n in soup.find_all('img'):
         G.nodes[n]['tag']='img'
-        print(G.nodes[n])
+for n in soup.find_all('style'):
+        G.nodes[n]['tag']='style'
+for n in soup.find_all('iframe'):
+        G.nodes[n]['tag']='iframe'
 
 
 print(G.number_of_nodes()) #15 is the correct number!
