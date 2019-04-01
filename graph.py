@@ -23,10 +23,10 @@ for child in soup.descendants:
         G.add_node(child, type='HTML', tag='misc')
         HTMLNodes.append(child)
 
-## Commented out for speed
-#for child in soup2.descendants:
-    #if(child.name is not None):
-        #bbcNodes.append(child)
+for n in soup.find_all('img'):
+        G.nodes[n]['tag']='img'
+        print(G.nodes[n])
+
 
 print(G.number_of_nodes()) #15 is the correct number!
 print(H.number_of_nodes()) #1344
@@ -41,8 +41,8 @@ for n in list(G.nodes):
                 for x in children:
                         if(m == x):
                                 htmlToHtmlEdges.append([n,m])
+                                G.add_edge(n,m)
 
-G.add_edges_from(htmlToHtmlEdges)
 print(G.number_of_edges())
 
 for n in soup.find_all(src=True):
@@ -51,8 +51,7 @@ for n in soup.find_all(src=True):
         G.add_node(src, type='HTTP')
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
-
-G.add_edges_from(htmlToHttpEdges)
+        G.add_edge(n,src)
 
 print(G.number_of_nodes())#19?????
 #drawing graph fingers crossed
@@ -61,7 +60,7 @@ plt.subplot(111)
 nx.draw_networkx_nodes(G,pos,
                        nodelist=HTMLNodes,
                        node_color='r',
-                       node_size=500,
+                       node_size=300,
                    alpha=1)
 nx.draw_networkx_edges(G,pos,
                        edgelist=htmlToHtmlEdges,
@@ -69,20 +68,18 @@ nx.draw_networkx_edges(G,pos,
 nx.draw_networkx_nodes(G,pos,
                        nodelist=httpNodes,
                        node_color='b',
-                       node_size=250,
+                       node_size=300,
                    alpha=1)
 nx.draw_networkx_edges(G,pos,
                        edgelist=htmlToHttpEdges,
                        width=3,alpha=0.8,edge_color='green')
-        
+plt.axis('off')     
 plt.show()
 #Things to do next:
-#Create an array of http nodes where a src attribute points to a url
+#Create an array of http nodes where an src attribute points to a url
 #add nodes to the graph, represent nodes with different colours
 #add edges to nodes with their corresponding html node
 
-#Method:
-#Beautifulsoup findall('src') and add that to http array
 #Code I have lost:
 #Adding atributes to my nodes
 #Add edges not by adding them to a list but individually as well
