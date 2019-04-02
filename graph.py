@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 G = nx.Graph()
 H = nx.Graph()
 
-site = urllib.request.urlopen("https://www.bbc.co.uk")#file:./docs/page.html
+site = urllib.request.urlopen("https://www.theguardian.com/uk")#file:./docs/page.html
 bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 
 soup = BeautifulSoup(site, 'lxml')
@@ -23,6 +23,9 @@ for child in soup.descendants:
     if(child.name is not None):
         G.add_node(child, type='HTML', tag='misc')
         HTMLNodes.append(child)
+        if(child.parent is not None):
+                G.add_edge(child, child.parent)
+                htmlToHtmlEdges.append([child,child.parent])
 #adding tage attributes for different types of nodes
 for n in soup.find_all('img'):
         G.nodes[n]['tag']='img'
@@ -37,15 +40,15 @@ print(H.number_of_nodes()) #1344
 
 #Attempting to create edges
 #For all the nodes create list of children
-for n in list(G.nodes):
-        children = n.contents
+#for n in list(G.nodes):
+ #       children = n.contents
         #Cycle through node list again
-        for m in list(G.nodes):
+  #      for m in list(G.nodes):
                 #cyclce through child list and check if any of the children of the current node are equal to any other node. If so append to edges list
-                for x in children:
-                        if(m == x):
-                                htmlToHtmlEdges.append([n,m])
-                                G.add_edge(n,m)
+   #             for x in children:
+    #                    if(m == x):
+     #                           htmlToHtmlEdges.append([n,m])
+      #                          G.add_edge(n,m)
 
 print(G.number_of_edges())
 #Adding HTTP layer
