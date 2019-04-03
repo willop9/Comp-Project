@@ -74,7 +74,7 @@ plt.subplot(111)
 nx.draw_networkx_nodes(G,pos,
                        nodelist=HTMLNodes,
                        node_color='r',
-                       node_size=300,
+                       node_size=150,
                        alpha=1)
 nx.draw_networkx_edges(G,pos,
                        edgelist=htmlToHtmlEdges,
@@ -82,7 +82,7 @@ nx.draw_networkx_edges(G,pos,
 nx.draw_networkx_nodes(G,pos,
                        nodelist=httpNodes,
                        node_color='b',
-                       node_size=300,
+                       node_size=150,
                        alpha=1)
 nx.draw_networkx_edges(G,pos,
                       edgelist=htmlToHttpEdges,
