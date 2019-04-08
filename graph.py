@@ -7,7 +7,7 @@ url = "https://www.theguardian.com/uk"
 G = nx.Graph(base_uri = url)
 H = nx.Graph()
 
-site = urllib.request.urlopen(url)#file:./docs/page.html
+site = urllib.request.urlopen("file:./docs/guardian.html")#file:./docs/page.html
 bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 
 soup = BeautifulSoup(site, 'lxml')
