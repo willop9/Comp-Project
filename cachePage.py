@@ -1,9 +1,11 @@
 import urllib.request
-import html2text
+from selenium import webdriver
 from bs4 import BeautifulSoup
+driver = webdriver.Firefox()
 url='https://www.theguardian.com/uk'
-page = urllib.request.urlopen(url)
-soup = BeautifulSoup(page, 'lxml')
+driver.get(url)
+html = driver.page_source
+soup = BeautifulSoup(html, 'lxml')
 name = 'guardian'
 #soup.prettify()
 with open('./docs/' + name + '.html', "w") as file:
