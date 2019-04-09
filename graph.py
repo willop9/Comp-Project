@@ -60,13 +60,13 @@ for n in soup.find_all(src=True):
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
         G.add_edge(n,src)
-
+#Changing iframes with src attribute
 for n in soup.find_all('iframe'):
-        src = n['src']
-        G.nodes[src]['type'] = 'HTTP iframe'
-        G.add_edge(n.parent,src)
-        htmlToHttpIframe.append([n.parent,src])
-
+        try:
+                src = n['src']
+                G.nodes[src]['type'] = 'HTTP iframe'
+                G.add_edge(n.parent,src)
+                htmlToHttpIframe.append([n.parent,src])
 
 print(G.number_of_nodes())#19?????
 #drawing graph fingers crossed
