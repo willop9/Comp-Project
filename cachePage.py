@@ -8,5 +8,5 @@ html = driver.page_source
 soup = BeautifulSoup(html, 'lxml')
 name = 'guardian'
 #soup.prettify()
-with open('./docs/' + name + '.html', "w") as file:
+with open(name + '.html', "w") as file:
     file.write(str(soup))
