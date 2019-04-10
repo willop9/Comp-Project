@@ -7,7 +7,7 @@ url = "https://www.theguardian.com/uk"
 G = nx.Graph(base_uri = url)
 H = nx.Graph()
 
-site = urllib.request.urlopen("file:./docs/guardian.html")#file:./docs/page.html
+site = urllib.request.urlopen("file:guardian.html")#file:./docs/page.html
 bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 
 soup = BeautifulSoup(site, 'lxml')
@@ -34,6 +34,8 @@ for n in soup.find_all('style'):
         G.nodes[n]['tag']='style'
 for n in soup.find_all('iframe'):
         G.nodes[n]['tag']='iframe'
+for n in soup.find_all('div'):
+        G.nodes[n]['tag']='div'
 
 
 print(G.number_of_nodes()) #15 is the correct number!
@@ -67,6 +69,8 @@ for n in soup.find_all('iframe'):
                 G.nodes[src]['type'] = 'HTTP iframe'
                 G.add_edge(n.parent,src)
                 htmlToHttpIframe.append([n.parent,src])
+        except:
+                print('Could not add node as iframe element does not have src attribute')
 
 print(G.number_of_nodes())#19?????
 #drawing graph fingers crossed
