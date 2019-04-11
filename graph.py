@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 url = "https://www.theguardian.com/uk"
-G = nx.DiGraph(base_uri = url)
+G = nx.Graph(base_uri = url)
 H = nx.DiGraph()
 
 site = urllib.request.urlopen("file:./docs/page.html")#file:./docs/page.html  file:guardian.html
@@ -80,11 +80,15 @@ a = np.zeros(shape=(G.number_of_nodes(), 11))
 print(a)
 for n in list(G.nodes):
         row = []
+        #convert graph to a directed view
+        diG = G.to_directed()
         #Find in degree
-        row.append(G.in_degree(n))
+        row.append(diG.in_degree(n))
         #out degree
-        row.append(G.out_degree(n))
+        row.append(diG.out_degree(n))
         #Descendants
+        row.append(diG.in_degree(n) + diG.out_degree(n))
+        print(row)
 
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
