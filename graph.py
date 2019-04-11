@@ -2,12 +2,13 @@ import urllib.request
 from bs4 import BeautifulSoup
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 
 url = "https://www.theguardian.com/uk"
-G = nx.Graph(base_uri = url)
-H = nx.Graph()
+G = nx.DiGraph(base_uri = url)
+H = nx.DiGraph()
 
-site = urllib.request.urlopen("file:guardian.html")#file:./docs/page.html
+site = urllib.request.urlopen("file:./docs/page.html")#file:./docs/page.html  file:guardian.html
 bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 
 soup = BeautifulSoup(site, 'lxml')
@@ -22,12 +23,12 @@ bbcNodes = []
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        G.add_node(child, type='HTML', tag='misc')
+        G.add_node(child, type='HTML', tag='misc', ad=0)
         HTMLNodes.append(child)
         if(child.parent is not None):
                 G.add_edge(child, child.parent)
                 htmlToHtmlEdges.append([child,child.parent])
-#adding tage attributes for different types of nodes
+#adding tag attributes for different types of nodes
 for n in soup.find_all('img'):
         G.nodes[n]['tag']='img'
 for n in soup.find_all('style'):
@@ -58,7 +59,7 @@ print(G.number_of_edges())
 for n in soup.find_all(src=True):
         src = n['src']
         print(n)
-        G.add_node(src, type='HTTP source')
+        G.add_node(src, type='HTTP source', ad=0)
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
         G.add_edge(n,src)
@@ -70,9 +71,21 @@ for n in soup.find_all('iframe'):
                 G.add_edge(n.parent,src)
                 htmlToHttpIframe.append([n.parent,src])
         except:
-                print('Could not add node as iframe element does not have src attribute')
+                print('Could not add http node as iframe element does not have src attribute')
 
-print(G.number_of_nodes())#19?????
+print(G.number_of_nodes())
+#Feature extraction
+index = 0
+a = np.zeros(shape=(G.number_of_nodes(), 11))
+print(a)
+for n in list(G.nodes):
+        row = []
+        #Find in degree
+        row.append(G.in_degree(n))
+        #out degree
+        row.append(G.out_degree(n))
+        #Descendants
+
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
 plt.subplot(111)
@@ -99,14 +112,5 @@ nx.draw_networkx_edges(G,pos,
 plt.axis('off')     
 plt.show()
 #Things to do next:
-#Create an array of http nodes where an src attribute points to a url
-#add nodes to the graph, represent nodes with different colours
-#add edges to nodes with their corresponding html node
-
-#Code I have lost:
-#Adding atributes to my nodes
-#Add edges not by adding them to a list but individually as well
-#Add nodes independantly and give them atrribute of misc
-#find all img, style, and iframe nodes and give them attributes
-
-#HTML to HTML edges need no attributes
+#label nodes for the guardian as ad or non ad
+#What is the best way to do this
