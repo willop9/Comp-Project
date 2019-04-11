@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib.request
+import numpy as np
 
 site = urllib.request.urlopen("file:./docs/page.html")
 
@@ -13,3 +14,7 @@ for n in array:
     print(src)
     print('////////////////////////')
     print(n)
+
+a = np.array([1,2,3,4,5])
+print("Printing array")
+print(a)
