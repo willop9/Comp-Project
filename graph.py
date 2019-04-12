@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-
+import math
 url = "https://www.theguardian.com/uk"
 G = nx.Graph(base_uri = url)
 H = nx.DiGraph()
@@ -20,14 +20,17 @@ htmlToHtmlEdges = []
 htmlToHttpEdges = []
 htmlToHttpIframe = []
 bbcNodes = []
+
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        G.add_node(child, type='HTML', tag='misc', ad=0)
-        HTMLNodes.append(child)
-        if(child.parent is not None):
-                G.add_edge(child, child.parent)
-                htmlToHtmlEdges.append([child,child.parent])
+        if (G.has_node(child) == False):
+                G.add_node(child, type='HTML', tag='misc', domain=G.graph['base_uri'], ad=0)
+                HTMLNodes.append(child)
+                if(child.parent is not None):
+                        G.add_edge(child, child.parent)
+                        htmlToHtmlEdges.append([child,child.parent])
+
 #adding tag attributes for different types of nodes
 for n in soup.find_all('img'):
         G.nodes[n]['tag']='img'
@@ -37,9 +40,8 @@ for n in soup.find_all('iframe'):
         G.nodes[n]['tag']='iframe'
 for n in soup.find_all('div'):
         G.nodes[n]['tag']='div'
-
-
-print(G.number_of_nodes()) #15 is the correct number!
+print(G.nodes.data())
+print(G.number_of_nodes()) #15 is the correct number! I am now getting 16 for some reason
 print(H.number_of_nodes()) #1344
 
 #Attempting to create edges
@@ -58,12 +60,13 @@ print(G.number_of_edges())
 #Adding HTTP layer
 for n in soup.find_all(src=True):
         src = n['src']
-        print(n)
-        G.add_node(src, type='HTTP source', ad=0)
+        print(src)
+        G.nodes[n]['domain'] = src
+        G.add_node(src, type='HTTP source',domain=src, ad=0)
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
         G.add_edge(n,src)
-#Changing iframes with src attribute
+#Changing http iframes with src attribute
 for n in soup.find_all('iframe'):
         try:
                 src = n['src']
@@ -77,19 +80,39 @@ print(G.number_of_nodes())
 #Feature extraction
 index = 0
 a = np.zeros(shape=(G.number_of_nodes(), 11))
+#phi = (1 + math.sqrt(5)) / 2.0
+#katz = nx.katz_centrality(G, 1/phi - 0.01)
+#for n, c in sorted(katz.items()):
+ #       print("%d %0.2f" % (n, c))
 print(a)
+#convert graph to a directed view
+diG = G.to_directed()
+katz=nx.katz_centrality(G)
+mdc=nx.average_neighbor_degree(G)
 for n in list(G.nodes):
         row = []
-        #convert graph to a directed view
-        diG = G.to_directed()
         #Find in degree
         row.append(diG.in_degree(n))
         #out degree
         row.append(diG.out_degree(n))
         #Descendants
         row.append(diG.in_degree(n) + diG.out_degree(n))
+        #Katz Centrality
+        row.append(katz[n])
+        #closeness centrality
+        row.append(nx.closeness_centrality(G,n))
+        #mean degree connectivity
+        row.append(mdc[n])
+        #eccentricity
+        row.append(nx.eccentricity(G,n))
+        #domain party
+        if G.nodes[n]['domain'] == G.graph['base_uri']:
+                row.append(1)
+        else:
+                row.append(0)
+        #node category
+        #ad keywords
         print(row)
-
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
 plt.subplot(111)
