@@ -21,15 +21,16 @@ htmlToHttpEdges = []
 htmlToHttpIframe = []
 bbcNodes = []
 
+is_first_node_loaded = False
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-        if (G.has_node(child) == False):
                 G.add_node(child, type='HTML', tag='misc', domain=G.graph['base_uri'], ad=0)
                 HTMLNodes.append(child)
-                if(child.parent is not None):
+                if(is_first_node_loaded):
                         G.add_edge(child, child.parent)
                         htmlToHtmlEdges.append([child,child.parent])
+                is_first_node_loaded = True
 
 #adding tag attributes for different types of nodes
 for n in soup.find_all('img'):
