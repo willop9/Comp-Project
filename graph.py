@@ -4,15 +4,14 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+test_url = "https://www.test.com"
 url = "https://www.theguardian.com/uk"
-G = nx.Graph(base_uri = url)
+G = nx.Graph(base_uri = test_url)
 H = nx.DiGraph()
 
 site = urllib.request.urlopen("file:./docs/page.html")#file:./docs/page.html  file:guardian.html
-bbc = urllib.request.urlopen("https://www.bbc.co.uk")
 
 soup = BeautifulSoup(site, 'lxml')
-soup2 = BeautifulSoup(bbc, 'lxml')
 
 HTMLNodes = []
 httpNodes = []
@@ -41,7 +40,6 @@ for n in soup.find_all('iframe'):
         G.nodes[n]['tag']='iframe'
 for n in soup.find_all('div'):
         G.nodes[n]['tag']='div'
-print(G.nodes.data())
 print(G.number_of_nodes()) #15 is the correct number! I am now getting 16 for some reason
 print(H.number_of_nodes()) #1344
 
@@ -76,6 +74,7 @@ for n in soup.find_all('iframe'):
                 htmlToHttpIframe.append([n.parent,src])
         except:
                 print('Could not add http node as iframe element does not have src attribute')
+                G.nodes[n]['type'] = 'HTML Iframe script'
 
 print(G.number_of_nodes())
 #Feature extraction
@@ -87,9 +86,11 @@ a = np.zeros(shape=(G.number_of_nodes(), 11))
  #       print("%d %0.2f" % (n, c))
 print(a)
 #convert graph to a directed view
+
 diG = G.to_directed()
 katz=nx.katz_centrality(G)
 mdc=nx.average_neighbor_degree(G)
+graph_domain_split = G.graph['base_uri'].split('.',2)[1]
 for n in list(G.nodes):
         row = []
         #Find in degree
@@ -106,8 +107,22 @@ for n in list(G.nodes):
         row.append(mdc[n])
         #eccentricity
         row.append(nx.eccentricity(G,n))
+        #Clustering
+        row.append(nx.clustering(G,n))
         #domain party
-        if G.nodes[n]['domain'] == G.graph['base_uri']:
+        if G.nodes[n]['domain'] == G.graph['base_uri']: #if the domain of the node is the same as the html doc then the value is 1.
+                row.append(1)
+        else:
+                row.append(0)
+        #sub domain
+        #Check if the domain attribute of the node is a sub domain of the base uri attribute of the graph.
+        node_dom = G.nodes[n]['domain']
+        split = node_dom.split('.',2)[0]
+        if split in {'http://www', 'https://www', 'www'}:
+                split_node_dom = node_dom.split('.',2)[1]
+        else:
+                split_node_dom = node_dom.split('.',1)[0]
+        if(split_node_dom == graph_domain_split):
                 row.append(1)
         else:
                 row.append(0)

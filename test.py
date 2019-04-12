@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import urllib.request
 import numpy as np
 
+url = "https://www.theguardian.com/uk"
+domain = url.split('.',2)
+print(domain)
 site = urllib.request.urlopen("file:./docs/page.html")
 
 soup = BeautifulSoup(site, 'lxml')
