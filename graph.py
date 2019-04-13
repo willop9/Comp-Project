@@ -24,7 +24,7 @@ is_first_node_loaded = False
 #Adding all page elements to node list
 for child in soup.descendants:
     if(child.name is not None):
-                G.add_node(child, type='HTML', tag='misc', domain=G.graph['base_uri'], ad=0)
+                G.add_node(child, type='HTML', domain=G.graph['base_uri'], ad=0)
                 HTMLNodes.append(child)
                 if(is_first_node_loaded):
                         G.add_edge(child, child.parent)
@@ -33,13 +33,13 @@ for child in soup.descendants:
 
 #adding tag attributes for different types of nodes
 for n in soup.find_all('img'):
-        G.nodes[n]['tag']='img'
+        G.nodes[n]['type']='HTML img'
 for n in soup.find_all('style'):
-        G.nodes[n]['tag']='style'
+        G.nodes[n]['type']='HTML style'
 for n in soup.find_all('iframe'):
-        G.nodes[n]['tag']='iframe'
+        G.nodes[n]['type']='HTML iframe'
 for n in soup.find_all('div'):
-        G.nodes[n]['tag']='div'
+        G.nodes[n]['type']='HTML div'
 print(G.number_of_nodes()) #15 is the correct number! I am now getting 16 for some reason
 print(H.number_of_nodes()) #1344
 
@@ -74,7 +74,7 @@ for n in soup.find_all('iframe'):
                 htmlToHttpIframe.append([n.parent,src])
         except:
                 print('Could not add http node as iframe element does not have src attribute')
-                G.nodes[n]['type'] = 'HTML Iframe script'
+                G.nodes[n]['type'] = 'HTML iframe'
 
 print(G.number_of_nodes())
 #Feature extraction
@@ -86,7 +86,7 @@ a = np.zeros(shape=(G.number_of_nodes(), 11))
  #       print("%d %0.2f" % (n, c))
 print(a)
 #convert graph to a directed view
-
+ad_words = ['ad', 'advert', 'advertisement', 'advertising', 'advertorial', 'banner','billboard','banner-ad','banner-advertisement','googleads']
 diG = G.to_directed()
 katz=nx.katz_centrality(G)
 mdc=nx.average_neighbor_degree(G)
@@ -127,6 +127,21 @@ for n in list(G.nodes):
         else:
                 row.append(0)
         #node category
+        node_type = G.nodes[n]['type']
+        if node_type == 'HTML':
+                row.append(0)
+        elif node_type == 'HTML img':
+                row.append(1)
+        elif node_type == 'HTML style':
+                row.append(2)
+        elif node_type == 'HTML iframe':
+                row.append(3)
+        elif node_type == 'HTML div':
+                row.append(4)
+        elif node_type == 'HTTP source':
+                row.append(5)
+        elif node_type == 'HTTP iframe':
+                row.append(6)
         #ad keywords
         print(row)
 #drawing graph fingers crossed
