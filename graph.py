@@ -93,6 +93,7 @@ mdc=nx.average_neighbor_degree(G)
 graph_domain_split = G.graph['base_uri'].split('.',2)[1]
 for n in list(G.nodes):
         row = []
+        ad_count = 0
         #Find in degree
         row.append(diG.in_degree(n))
         #out degree
@@ -143,6 +144,24 @@ for n in list(G.nodes):
         elif node_type == 'HTTP iframe':
                 row.append(6)
         #ad keywords
+        try:    #Checking in the attributes  
+                tag = n.attrs
+                node_attributes = tag.values()
+                for x in ad_words:
+                        for y in node_attributes:
+                                if x in y:
+                                        ad_count += 1
+                #Check the text of a node as well if it exists
+                if n.string is not None:
+                        for x in ad_words:
+                                if x in n.string:
+                                        ad_count +=1
+                row.append(ad_count)
+        except: #try statement only fails when the node is a string as in HTTP node
+                for x in ad_words:
+                        if x in n:
+                                ad_count += 1
+                row.append(ad_count)   
         print(row)
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
