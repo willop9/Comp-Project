@@ -6,11 +6,11 @@ import numpy as np
 import math
 import csv
 test_url = "https://www.test.com"
-url = "https://www.theguardian.com/uk"
+url = "https://www.bristolpost.co.uk/"
 G = nx.Graph(base_uri = url)
 H = nx.DiGraph()
 
-site = urllib.request.urlopen("file:./docs/page.html")#file:./docs/page.html  file:guardian.html
+site = urllib.request.urlopen("file:./pages/bristolPost.html")#file:./docs/page.html  file:guardian.html
 
 soup = BeautifulSoup(site, 'lxml')
 
@@ -65,7 +65,15 @@ for n in soup.find_all(src=True):
         G.add_node(src, type='HTTP source',domain=src, ad=0)
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
-        G.add_edge(n,src, type='htmlhttp')
+        G.add_edge(n,src, type='htmlhttpsrc')
+
+for n in soup.find_all(href=True):
+        href = n['href']
+        G.nodes[n]['domain'] = href
+        G.add_node(href, type='HTTP href',domain=href, ad=0)
+        httpNodes.append(href)
+        htmlToHttpEdges.append([n,href])
+        G.add_edge(n,href, type='htmlhttphref')
 #Changing http iframes with src attribute
 for n in soup.find_all('iframe'):
         try:
@@ -78,13 +86,13 @@ for n in soup.find_all('iframe'):
                 G.nodes[n]['type'] = 'HTML iframe'
 
 print(G.number_of_nodes())
-nx.write_gexf(G,'test.gexf')
+nx.write_gexf(G,'./Graphs/bristolPost.gexf')
 #Feature extraction
 index = 0
 a = np.zeros(shape=(G.number_of_nodes(), 9))
 print(a)
 #convert graph to a directed view
-ad_words = ['ad', 'advert', 'advertisement', 'advertising', 'advertorial', 'banner','billboard','banner-ad','banner-advertisement','googleads', 'product']
+ad_words = ['ad', 'advert', 'advertisement', 'advertising', 'advertorial', 'banner','billboard','banner-ad','banner-advertisement','googleads', 'product', 'sponsor']
 diG = G.to_directed()
 #katz = nx.katz_centrality(G, alpha=0.1, beta=1.0, max_iter=10) Takes too long
 #closeness = nx.closeness_centrality(G)
@@ -146,6 +154,9 @@ for n in list(G.nodes):
                 row.append(5)
         elif node_type == 'HTTP iframe':
                 row.append(6)
+        elif node_type == 'HTTP href':
+                row.append(7)
+
         #ad keywords
         try:    #Checking in the attributes  
                 tag = n.attrs
@@ -165,12 +176,12 @@ for n in list(G.nodes):
                 for x in ad_words:
                         if x in n:
                                 ad_count += 1
-                row.append(ad_count)   
+                row.append(ad_count)
+        print(row)   
         a[index][:] = row
         index += 1
-        print(row)
         #print(a)
-np.savetxt("guardian.csv", a, delimiter=",")
+np.savetxt("./Features/brispost.csv", a, delimiter=",")
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
 plt.subplot(111)
