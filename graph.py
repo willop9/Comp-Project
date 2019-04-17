@@ -4,9 +4,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import csv
 test_url = "https://www.test.com"
 url = "https://www.theguardian.com/uk"
-G = nx.Graph(base_uri = test_url)
+G = nx.Graph(base_uri = url)
 H = nx.DiGraph()
 
 site = urllib.request.urlopen("file:./docs/page.html")#file:./docs/page.html  file:guardian.html
@@ -27,7 +28,7 @@ for child in soup.descendants:
                 G.add_node(child, type='HTML', domain=G.graph['base_uri'], ad=0)
                 HTMLNodes.append(child)
                 if(is_first_node_loaded):
-                        G.add_edge(child, child.parent)
+                        G.add_edge(child, child.parent, type='htmlhtml')
                         htmlToHtmlEdges.append([child,child.parent])
                 is_first_node_loaded = True
 
@@ -64,32 +65,34 @@ for n in soup.find_all(src=True):
         G.add_node(src, type='HTTP source',domain=src, ad=0)
         httpNodes.append(src)
         htmlToHttpEdges.append([n,src])
-        G.add_edge(n,src)
+        G.add_edge(n,src, type='htmlhttp')
 #Changing http iframes with src attribute
 for n in soup.find_all('iframe'):
         try:
                 src = n['src']
                 G.nodes[src]['type'] = 'HTTP iframe'
-                G.add_edge(n.parent,src)
+                G.add_edge(n.parent,src, type='htmlhttpiframe')
                 htmlToHttpIframe.append([n.parent,src])
         except:
                 print('Could not add http node as iframe element does not have src attribute')
                 G.nodes[n]['type'] = 'HTML iframe'
 
 print(G.number_of_nodes())
+nx.write_gexf(G,'test.gexf')
 #Feature extraction
 index = 0
-a = np.zeros(shape=(G.number_of_nodes(), 11))
-#phi = (1 + math.sqrt(5)) / 2.0
-#katz = nx.katz_centrality(G, 1/phi - 0.01)
-#for n, c in sorted(katz.items()):
- #       print("%d %0.2f" % (n, c))
+a = np.zeros(shape=(G.number_of_nodes(), 9))
 print(a)
 #convert graph to a directed view
-ad_words = ['ad', 'advert', 'advertisement', 'advertising', 'advertorial', 'banner','billboard','banner-ad','banner-advertisement','googleads']
+ad_words = ['ad', 'advert', 'advertisement', 'advertising', 'advertorial', 'banner','billboard','banner-ad','banner-advertisement','googleads', 'product']
 diG = G.to_directed()
-katz=nx.katz_centrality(G)
-mdc=nx.average_neighbor_degree(G)
+#katz = nx.katz_centrality(G, alpha=0.1, beta=1.0, max_iter=10) Takes too long
+#closeness = nx.closeness_centrality(G)
+#eccentricity = nx.eccentricity(G)
+clustering = nx.clustering(G)
+print('clustering complete')
+mdc=nx.average_neighbor_degree(G) #mean degree connectivity
+print('mean degree connectivity complete')
 graph_domain_split = G.graph['base_uri'].split('.',2)[1]
 for n in list(G.nodes):
         row = []
@@ -101,15 +104,15 @@ for n in list(G.nodes):
         #Descendants
         row.append(diG.in_degree(n) + diG.out_degree(n))
         #Katz Centrality
-        row.append(katz[n])
+        #row.append(katz[n]) Takes too long on actual graphs even with reduced iteration number
         #closeness centrality
-        row.append(nx.closeness_centrality(G,n))
+        #row.append(closeness[n])
         #mean degree connectivity
         row.append(mdc[n])
         #eccentricity
-        row.append(nx.eccentricity(G,n))
+        #row.append(eccentricity[n])
         #Clustering
-        row.append(nx.clustering(G,n))
+        row.append(clustering[n])
         #domain party
         if G.nodes[n]['domain'] == G.graph['base_uri']: #if the domain of the node is the same as the html doc then the value is 1.
                 row.append(1)
@@ -150,7 +153,8 @@ for n in list(G.nodes):
                 for x in ad_words:
                         for y in node_attributes:
                                 if x in y:
-                                        ad_count += 1
+                                        for x in y:
+                                                ad_count += 1
                 #Check the text of a node as well if it exists
                 if n.string is not None:
                         for x in ad_words:
@@ -162,7 +166,11 @@ for n in list(G.nodes):
                         if x in n:
                                 ad_count += 1
                 row.append(ad_count)   
+        a[index][:] = row
+        index += 1
         print(row)
+        #print(a)
+np.savetxt("guardian.csv", a, delimiter=",")
 #drawing graph fingers crossed
 pos = nx.spring_layout(G)
 plt.subplot(111)
